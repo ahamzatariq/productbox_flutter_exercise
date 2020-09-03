@@ -75,11 +75,11 @@ class _SignInState extends State<SignIn> {
                       color: Colors.blue,
                     ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
+                      borderRadius: BorderRadius.circular(45),
                       borderSide: BorderSide(
                         color: Colors.blue,
-                        style: BorderStyle.solid,
                       ),
+                      gapPadding: 0.0,
                     ),
                   ),
                   validator: (value) {
@@ -179,8 +179,8 @@ class _SignInState extends State<SignIn> {
     String password;
     var result = false;
 
-    if (usernameController != null) username = usernameController.text;
-    if (passwordController != null) password = passwordController.text;
+    if (usernameController != null) username = usernameController.text.trim();
+    if (passwordController != null) password = passwordController.text.trim();
 
     var isValid = _formKey.currentState.validate();
 
