@@ -89,7 +89,7 @@ class _UserScreenState extends State<UserScreen> {
                     print(_storedImageLicense);
                     print(_storedImageCertificate);
                   },
-                  color: currentSteps<3? Colors.grey: Colors.cyan,
+                  color: currentSteps < 3 ? Colors.grey : Colors.cyan,
                   child: Text(
                     'Done',
                   ),
@@ -148,27 +148,27 @@ class _UserScreenState extends State<UserScreen> {
   }
 
   Widget customCard(String title, Icon icon, int cardNumber) {
-    File _storedImage;
-    _storedImage = null;
+    File _tempStoredFile;
+    _tempStoredFile = null;
     switch (cardNumber) {
       case 0:
-        _storedImage = _storedImageID;
+        _tempStoredFile = _storedImageID;
         break;
 
       case 1:
-        _storedImage = _storedImageCV;
+        _tempStoredFile = _storedImageCV;
         break;
 
       case 2:
-        _storedImage = _storedImageLicense;
+        _tempStoredFile = _storedImageLicense;
         break;
 
       case 3:
-        _storedImage = _storedImageCertificate;
+        _tempStoredFile = _storedImageCertificate;
         break;
 
       default:
-        _storedImage = null;
+        _tempStoredFile = null;
     }
 
     return Card(
@@ -188,17 +188,26 @@ class _UserScreenState extends State<UserScreen> {
               Text(title),
             ],
           ),
-          trailing: _storedImage != null
+          trailing: (_tempStoredFile != null &&
+                  (_tempStoredFile.path.endsWith('.png') ||
+                      _tempStoredFile.path.endsWith('.jpg')))
               ? Container(
                   height: 50,
                   width: 50,
                   padding: EdgeInsets.all(5),
                   child: Image.file(
-                    _storedImage,
+                    _tempStoredFile,
                     fit: BoxFit.fill,
                   ),
                 )
-              : icon),
+              : (_tempStoredFile != null &&
+                      _tempStoredFile.path.endsWith('.pdf'))
+                  ? Icon(
+                      Icons.picture_as_pdf,
+                      color: Colors.redAccent,
+                      size: 45,
+                    )
+                  : icon),
     );
   }
 
@@ -222,7 +231,23 @@ class _UserScreenState extends State<UserScreen> {
                 children: <Widget>[
                   GestureDetector(
                     onTap: () {
-                      pickImageOrPdf();
+                      pickDocument();
+                    },
+                    child: Column(
+                      children: <Widget>[
+                        Icon(
+                          Icons.insert_drive_file,
+                          size: 48,
+                          color: Colors.redAccent,
+                        ),
+                        Text('Document'),
+                      ],
+                    ),
+                  ),
+                  Divider(),
+                  GestureDetector(
+                    onTap: () {
+                      pickImage();
                     },
                     child: Column(
                       children: <Widget>[
@@ -249,7 +274,7 @@ class _UserScreenState extends State<UserScreen> {
                         Icon(
                           Icons.camera_alt,
                           size: 48,
-                          color: Colors.blue,
+                          color: Colors.black,
                         ),
                         Text('Camera'),
                       ],
@@ -270,8 +295,6 @@ class _UserScreenState extends State<UserScreen> {
     // ignore: deprecated_member_use
     tempFile = await ImagePicker.pickImage(
       source: ImageSource.camera,
-      maxWidth: 150,
-      imageQuality: 50,
     );
     if (tempFile == null) return null;
     setState(() {
@@ -290,7 +313,7 @@ class _UserScreenState extends State<UserScreen> {
 //    widget.onSelectImage(savedImage);
   }
 
-  void pickImageOrPdf() async {
+  void pickImage() async {
     File tempFile;
     var tempPath;
     tempFile = null;
@@ -320,10 +343,34 @@ class _UserScreenState extends State<UserScreen> {
     }
   }
 
-  void viewLicense() {
-    print('viewLicense');
-    Navigator.of(context)
-        .pushNamed(ViewImageScreen.routeName, arguments: _storedImageLicense);
+  void pickDocument() async {
+    File tempFile;
+    var tempPath;
+    tempFile = null;
+    tempPath = null;
+    FilePickerCross filePickerCross = await FilePickerCross.importFromStorage(
+        type: FileTypeCross.custom,
+        // Available: `any`, `audio`, `image`, `video`, `custom`. Note: not available using FDE
+        fileExtension:
+            '.pdf' // Only if FileTypeCross.custom . May be any file extension like `.dot`, `.ppt,.pptx,.odp`
+        );
+    tempPath = filePickerCross.path;
+    tempFile = File(tempPath);
+    setState(() {
+      if (currentSteps == 0)
+        _storedImageID = tempFile;
+      else if (currentSteps == 1)
+        _storedImageCV = tempFile;
+      else if (currentSteps == 2)
+        _storedImageLicense = tempFile;
+      else if (currentSteps == 3) _storedImageCertificate = tempFile;
+    });
+
+    if (tempFile != null) {
+      setState(() {
+        currentSteps++;
+      });
+    }
   }
 
   void viewId() {
@@ -336,6 +383,12 @@ class _UserScreenState extends State<UserScreen> {
     print('viewCV');
     Navigator.of(context)
         .pushNamed(ViewImageScreen.routeName, arguments: _storedImageCV);
+  }
+
+  void viewLicense() {
+    print('viewLicense');
+    Navigator.of(context)
+        .pushNamed(ViewImageScreen.routeName, arguments: _storedImageLicense);
   }
 
   void viewCertificate() {
