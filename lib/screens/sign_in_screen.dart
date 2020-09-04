@@ -46,6 +46,10 @@ class _SignInState extends State<SignIn> {
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+                image: AssetImage('assets/images/background_hexagon.jpg')),
+          ),
           padding: EdgeInsets.all(20),
           height: deviceSize.height,
           width: deviceSize.width,
